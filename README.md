@@ -4,7 +4,7 @@ We handle authentication, you handle Authorisation.
 
 ## Running auth_r
 
-###s Environment variables
+### Environment variables
 
 ```.env
 DATABASE_URL={url to postgres database}
