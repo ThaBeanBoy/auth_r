@@ -13,25 +13,14 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
 import { relations } from "drizzle-orm";
 
+import { v4 as uuidv4 } from "uuid";
+
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
  * database instance for multiple projects.
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-
-function generateKey(length = 24) {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
-  }
-  return result;
-}
 
 export const createTable = pgTableCreator((name) => `auth_r_${name}`);
 
@@ -42,11 +31,11 @@ export const apps = createTable("application", {
   publicKey: varchar("public_key")
     .notNull()
     .unique()
-    .$defaultFn(() => generateKey()),
+    .$defaultFn(() => uuidv4()),
   privateKey: varchar("private_key")
     .notNull()
     .unique()
-    .$defaultFn(() => generateKey()),
+    .$defaultFn(() => uuidv4()),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -66,12 +55,13 @@ export const appsRelations = relations(apps, ({ many, one }) => ({
 export const users = createTable("user", {
   ID: varchar("user_id")
     .primaryKey()
-    .$defaultFn(() => generateKey()),
+    .$defaultFn(() => uuidv4()),
   appID: integer("app_id")
     .notNull()
     .references((): AnyPgColumn => apps.ID),
   email: varchar("email"),
   password: varchar("password"),
+  username: varchar("username"),
   name: varchar("name"),
   surname: varchar("surname"),
   profilePicture: varchar("profile_picture"),
@@ -94,7 +84,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
 export const sessions = createTable("session", {
   ID: varchar("ID")
     .primaryKey()
-    .$defaultFn(() => generateKey()),
+    .$defaultFn(() => uuidv4()),
   userID: varchar("user_id")
     .notNull()
     .references((): AnyPgColumn => users.ID),

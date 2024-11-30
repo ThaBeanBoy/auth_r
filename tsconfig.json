@@ -36,7 +36,8 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.js",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/app/terms-and-conditions/page.mdx"
   ],
   "exclude": ["node_modules"]
 }

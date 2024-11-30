@@ -1,22 +1,16 @@
 import { TRPCError } from "@trpc/server";
-
-import * as z from "zod";
 import { eq, and } from "drizzle-orm";
 
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { users, apps } from "@/server/db/schema";
+import { PasswordEmailSignUpSchema } from "@/schemas";
+
+import bcrypt from "bcrypt";
+import { env } from "@/env";
 
 export const signupRouter = createTRPCRouter({
   email_password: publicProcedure
-    .input(
-      z.object({
-        publicKey: z.string(),
-        email: z.string(),
-        password: z.string(),
-        name: z.string().nullable(),
-        surname: z.string().nullable(),
-      }),
-    )
+    .input(PasswordEmailSignUpSchema)
     .mutation(async ({ ctx, input }) => {
       // querying app
       const app = await ctx.db.query.apps.findFirst({
@@ -41,6 +35,9 @@ export const signupRouter = createTRPCRouter({
           message: "email already in use",
         });
       }
+
+      // encrypting password
+      input.password = await bcrypt.hash(input.password, env.SALT_ROUNDS);
 
       // adding user
       await ctx.db.insert(users).values({ appID: app.ID, ...input });
